@@ -1,5 +1,5 @@
 name: any_image
-description: "A new Flutter package project."
+description: "A universal Flutter image widget that renders any source"
 version: 0.0.1
 homepage:
 

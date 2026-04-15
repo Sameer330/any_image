@@ -6,6 +6,6 @@ enum SourceType {
   /// A project asset declared in pubspec.yaml
   asset,
 
-  ///
+  /// A vector SVG image. Location could be asset or network.
   svg,
 }

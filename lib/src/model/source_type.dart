@@ -1,11 +1,17 @@
-/// Represents a resolved type of an image source
-enum SourceType {
-  /// An image accessible by HTTP or HTTPS
+/// Represents the location of an image source
+enum ImageLocation {
+  /// An image accessible via HTTP or HTTPS
   network,
 
-  /// A project asset declared in pubspec.yaml
+  /// A Flutter asset declared in pubspec.yaml
   asset,
+}
 
-  /// A vector SVG image. Location could be asset or network.
+/// Represents the format of an image source
+enum ImageFormat {
+  /// A raster image such as PNG, JPEG, WebP, or GIF
+  raster,
+
+  /// A vector SVG image
   svg,
 }

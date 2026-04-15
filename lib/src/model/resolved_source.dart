@@ -6,11 +6,15 @@ class ResolvedSource {
   /// The original string as passed by developer
   final String raw;
 
-  /// The resolved type of the raw source
-  final SourceType type;
+  /// Where the image is loaded from.
+  final ImageLocation location;
+
+  /// How the image should be rendered.
+  final ImageFormat format;
 
   const ResolvedSource({
     required this.raw,
-    required this.type,
+    required this.location,
+    required this.format,
   });
 }

@@ -3,10 +3,14 @@ import '../model/source_type.dart';
 import 'source_resolver.dart';
 
 /// Resolves image sources based on file extension
-/// 
+///
 /// Handles the following cases:
-/// - `.svg` extension -> [SourceType.svg]
-/// - `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif` -> [SourceType.asset]
+/// - `.svg` extension -> [ImageFormat.svg]
+/// - `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif` -> [ImageFormat.raster]
+///
+/// Note: This resolver only determines format, not location.
+/// It should run after [PrefixResolver] in the pipeline so that
+/// location is already established when possible
 class ExtensionResolver implements SourceResolver {
   const ExtensionResolver();
 
@@ -14,13 +18,13 @@ class ExtensionResolver implements SourceResolver {
 
   /// FYI - pixel based images
   /// Raster - commonly used in UI design domain
-  static const _rasterExtensions = [
+  static const _rasterExtensions = {
     '.png',
     '.jpg',
     '.jpeg',
     '.webp',
     '.gif',
-  ];
+  };
 
   @override
   ResolvedSource? resolve(String source) {
@@ -30,11 +34,19 @@ class ExtensionResolver implements SourceResolver {
     if (ext == null) return null;
 
     if (ext == _svgExtension) {
-      return ResolvedSource(raw: source, type: SourceType.svg);
+      return ResolvedSource(
+        raw: source,
+        location: ImageLocation.network,
+        format: ImageFormat.svg,
+      );
     }
 
     if (_rasterExtensions.contains(ext)) {
-      return ResolvedSource(raw: source, type: SourceType.network);
+      return ResolvedSource(
+        raw: source,
+        location: ImageLocation.network,
+        format: ImageFormat.raster,
+      );
     }
 
     return null;
@@ -48,6 +60,6 @@ class ExtensionResolver implements SourceResolver {
   String? _extractExtension(String path) {
     final dotIndex = path.lastIndexOf('.');
     if (dotIndex == -1 || dotIndex == path.length - 1) return null;
-    return path.substring(0, dotIndex).toLowerCase();
+    return path.substring(dotIndex).toLowerCase();
   }
 }

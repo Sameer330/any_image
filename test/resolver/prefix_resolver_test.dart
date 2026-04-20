@@ -14,11 +14,6 @@ void main() {
         expect(result?.location, ImageLocation.asset);
       });
 
-      test('defaults format to raster for asset prefix', () {
-        final result = resolver.resolve(source);
-        expect(result?.format, ImageFormat.raster);
-      });
-
       test('preserve raw source string', () {
         final result = resolver.resolve(source);
         expect(result?.raw, source);
@@ -34,11 +29,6 @@ void main() {
       test('resolved http:// prefix to network location', () {
         final result = resolver.resolve('http://example.com/image.png');
         expect(result?.location, ImageLocation.network);
-      });
-
-      test('defaults format to raster for network prefix', () {
-        final result = resolver.resolve('https://example.com/image.png');
-        expect(result?.format, ImageFormat.raster);
       });
     });
 

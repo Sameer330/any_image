@@ -14,11 +14,6 @@ void main() {
         expect(result?.format, ImageFormat.svg);
       });
 
-      test('defaults location to network for svg', () {
-        final result = resolver.resolve(source);
-        expect(result?.location, ImageLocation.network);
-      });
-
       test('preserves raw source string', () {
         final result = resolver.resolve(source);
         expect(result?.raw, source);

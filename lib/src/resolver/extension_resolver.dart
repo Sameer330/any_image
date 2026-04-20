@@ -34,19 +34,11 @@ class ExtensionResolver implements SourceResolver {
     if (ext == null) return null;
 
     if (ext == _svgExtension) {
-      return ResolvedSource(
-        raw: source,
-        location: ImageLocation.network,
-        format: ImageFormat.svg,
-      );
+      return ResolvedSource(raw: source, format: ImageFormat.svg);
     }
 
     if (_rasterExtensions.contains(ext)) {
-      return ResolvedSource(
-        raw: source,
-        location: ImageLocation.network,
-        format: ImageFormat.raster,
-      );
+      return ResolvedSource(raw: source, format: ImageFormat.raster);
     }
 
     return null;

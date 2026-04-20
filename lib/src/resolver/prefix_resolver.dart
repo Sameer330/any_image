@@ -16,20 +16,11 @@ class PrefixResolver implements SourceResolver {
   @override
   ResolvedSource? resolve(String source) {
     if (source.startsWith('assets/')) {
-      return ResolvedSource(
-        raw: source,
-        location: ImageLocation.asset,
-        // Set default to raster, format will be resolved later in pipeline
-        format: ImageFormat.raster,
-      );
+      return ResolvedSource(raw: source, location: ImageLocation.asset);
     }
 
     if (source.startsWith('http://') || source.startsWith('https://')) {
-      return ResolvedSource(
-        raw: source,
-        location: ImageLocation.network,
-        format: ImageFormat.raster,
-      );
+      return ResolvedSource(raw: source, location: ImageLocation.network);
     }
 
     return null;

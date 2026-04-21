@@ -23,7 +23,7 @@ abstract interface class ImageRenderer {
     double? width,
     double? height,
     BoxFit? fit,
-    Widget? placeHolder,
+    Widget? placeholder,
     Widget? errorWidget,
   });
 }

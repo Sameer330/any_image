@@ -5,15 +5,15 @@ import '../model/resolved_source.dart';
 import '../model/source_type.dart';
 import 'image_renderer.dart';
 
-/// Renders an SVG image loaded from a network URL
+/// Renders an SVG image loaded from Flutter assets
 ///
-/// Delegates to [SvgPicture.network] from flutter_svg
-class NetworkSvgRenderer implements ImageRenderer {
-  const NetworkSvgRenderer();
+/// Delegates to [SvgPicture.asset] from flutter_svg
+class AssetSvgRenderer implements ImageRenderer {
+  const AssetSvgRenderer();
 
   @override
   bool canRender(ResolvedSource source) {
-    return source.location == ImageLocation.network &&
+    return source.location == ImageLocation.asset &&
         source.format == ImageFormat.svg;
   }
 
@@ -26,12 +26,13 @@ class NetworkSvgRenderer implements ImageRenderer {
     Widget? placeholder,
     Widget? errorWidget,
   }) {
-    return SvgPicture.network(
+    return SvgPicture.asset(
       source.raw,
       width: width,
       height: height,
       fit: fit ?? BoxFit.contain,
       placeholderBuilder: placeholder != null ? (_) => placeholder : null,
+      errorBuilder: errorWidget != null ? (_, __, ___) => errorWidget : null,
     );
   }
 }

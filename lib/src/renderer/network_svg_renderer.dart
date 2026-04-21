@@ -1,19 +1,18 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../model/resolved_source.dart';
 import '../model/source_type.dart';
 import 'image_renderer.dart';
 
-/// Renders a raster image loaded from Flutter assets
+/// Renders an SVG image loaded from a network URL
 ///
-/// Delegates to [Image.asset] from the Flutter framework
-class AssetRasterRenderer implements ImageRenderer {
-  const AssetRasterRenderer();
-
+/// Delegates to [SvgPicture.network] from flutter_svg
+class NetworkSvgRenderer implements ImageRenderer {
   @override
   bool canRender(ResolvedSource source) {
-    return source.location == ImageLocation.asset &&
-        source.format == ImageFormat.raster;
+    return source.location == ImageLocation.network &&
+        source.format == ImageFormat.svg;
   }
 
   @override
@@ -25,14 +24,12 @@ class AssetRasterRenderer implements ImageRenderer {
     Widget? placeholder,
     Widget? errorWidget,
   }) {
-    return Image.asset(
+    return SvgPicture.network(
       source.raw,
       width: width,
       height: height,
-      fit: fit,
-      errorBuilder: errorWidget != null
-          ? (context, error, stackTrace) => errorWidget
-          : null,
+      fit: fit ?? BoxFit.contain,
+      placeholderBuilder: placeholder != null ? (_) => placeholder : null,
     );
   }
 }

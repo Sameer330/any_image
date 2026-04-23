@@ -25,7 +25,7 @@ The core problem: accept any image source string and render the correct widget a
 
 ## Upcoming
 
-### v0.1.0 — File Support + HTTP Headers
+### v0.1.0 — File Support
 
 Add support for rendering images from the local filesystem, and forward HTTP headers for authenticated network requests.
 

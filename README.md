@@ -115,6 +115,8 @@ The resolved location and format are merged, then dispatched to the correct rend
 - [ ] Builder API for custom loading states
 - [ ] Fallback chained source support
 
+Check out our roadmap here: [Roadmap](ROADMAP.md)
+
 ---
 
 ## Contributing

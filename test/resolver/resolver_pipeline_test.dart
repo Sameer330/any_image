@@ -12,13 +12,13 @@ void main() {
   group('ResolverPipeline', () {
     group('network raster', () {
       test('resolves https png url correctly', () {
-        final result = pipeline.resolve('https://example.com/image.png');
+        final result = pipeline.resolveSync('https://example.com/image.png');
         expect(result.location, ImageLocation.network);
         expect(result.format, ImageFormat.raster);
       });
 
       test('resolves https url with no extension to network raster', () {
-        final result = pipeline.resolve('https://example.com/image');
+        final result = pipeline.resolveSync('https://example.com/image');
         expect(result.location, ImageLocation.network);
         expect(result.format, ImageFormat.raster);
       });
@@ -26,13 +26,14 @@ void main() {
 
     group('network svg', () {
       test('resolves https svg url correctly', () {
-        final result = pipeline.resolve('https://example.com/logo.svg');
+        final result = pipeline.resolveSync('https://example.com/logo.svg');
         expect(result.location, ImageLocation.network);
         expect(result.format, ImageFormat.svg);
       });
 
       test('resolves https svg url with query params correctly', () {
-        final result = pipeline.resolve('https://example.com/logo.svg?v=123');
+        final result =
+            pipeline.resolveSync('https://example.com/logo.svg?v=123');
         expect(result.location, ImageLocation.network);
         expect(result.format, ImageFormat.svg);
       });
@@ -40,7 +41,7 @@ void main() {
 
     group('asset raster', () {
       test('resolves asset png correctly', () {
-        final result = pipeline.resolve('assets/images/logo.png');
+        final result = pipeline.resolveSync('assets/images/logo.png');
         expect(result.location, ImageLocation.asset);
         expect(result.format, ImageFormat.raster);
       });
@@ -48,7 +49,7 @@ void main() {
 
     group('asset svg', () {
       test('resolves asset svg correctly', () {
-        final result = pipeline.resolve('assets/icons/logo.svg');
+        final result = pipeline.resolveSync('assets/icons/logo.svg');
         expect(result.location, ImageLocation.asset);
         expect(result.format, ImageFormat.svg);
       });
@@ -56,7 +57,7 @@ void main() {
 
     group('fallback', () {
       test('falls back to network raster for unrecognised source', () {
-        final result = pipeline.resolve('some-random-string');
+        final result = pipeline.resolveSync('some-random-string');
         expect(result.location, ImageLocation.network);
         expect(result.format, ImageFormat.raster);
       });

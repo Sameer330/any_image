@@ -53,8 +53,9 @@ class ExampleScreen extends StatelessWidget {
               errorWidget: Center(child: Icon(Icons.broken_image)),
             ),
             _SectionLabel('Network — no extension (MIME sniffing)'),
-            AnyImage.withMimeSniffing(
-              source: 'https://avatars.githubusercontent.com/u/33640448?v=4',
+            AnyImage(
+              // source: 'https://avatars.githubusercontent.com/u/33640448?v=4',
+              source: 'https://skillicons.dev/icons?i=flutter',
               width: double.infinity,
               height: 200,
               placeholder: Center(child: CircularProgressIndicator()),

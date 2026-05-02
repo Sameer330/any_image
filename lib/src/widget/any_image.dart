@@ -19,10 +19,8 @@ import '../resolver/resolver_pipeline.dart';
 ///
 /// Supports network URLs, asset paths, and SVG images without
 /// requiring the caller to know the image type in advance.
-///
-/// By default uses sync resolution only. Pass [asyncResolvers]
-/// such as [MimeResolver] to enable async resolution for
-/// extension-less URLs.
+/// MIME sniffing is enabled by default for extension-less URLs
+/// and can be disabled via [allowMimeSniff].
 ///
 /// ```dart
 /// AnyImage(source: 'https://example.com/image.png')
@@ -53,15 +51,10 @@ class AnyImage extends StatefulWidget {
   /// signals for the resolver to determine the correct type.
   final ImageFormat? format;
 
-  /// The resolver pipeline used to classify the source.
+  /// Allows developer to opt-out of using Mime Sniffing
   ///
-  /// Defaults to [PrefixResolver] and [ExtensionResolver].
-  /// Override to add [MimeResolver] or custom resolvers.
-  final ResolverPipeline pipeline;
-
-  static const _defaultPipeline = ResolverPipeline(
-    resolvers: [PrefixResolver(), ExtensionResolver()],
-  );
+  /// Mime Sniffing is enabled by default.
+  final bool allowMimeSniff;
 
   static const _renderers = [
     NetworkRasterRenderer(),
@@ -79,37 +72,8 @@ class AnyImage extends StatefulWidget {
     this.placeholder,
     this.errorWidget,
     this.format,
-    this.pipeline = _defaultPipeline,
+    this.allowMimeSniff = true,
   });
-
-  /// Creates an [AnyImage] with MIME sniffing enabled.
-  ///
-  /// Use this when the source URL does not contain a file
-  /// extension or other format signals. Makes an HTTP HEAD
-  /// request to determine the image format from the
-  /// Content-Type header.
-  ///
-  /// Has no effect on asset sources — MIME sniffing only
-  /// applies to network URLs.
-  ///
-  /// ```dart
-  /// AnyImage.withMimeSniffing(
-  ///   source: 'https://cdn.example.com/a8f3k',
-  /// )
-  /// ```
-  const AnyImage.withMimeSniffing({
-    super.key,
-    required this.source,
-    this.width,
-    this.height,
-    this.fit,
-    this.placeholder,
-    this.errorWidget,
-    this.format,
-  }) : pipeline = const ResolverPipeline(
-          resolvers: [PrefixResolver(), ExtensionResolver()],
-          asyncResolvers: [MimeResolver()],
-        );
 
   @override
   State<AnyImage> createState() => _AnyImageState();
@@ -117,33 +81,45 @@ class AnyImage extends StatefulWidget {
 
 class _AnyImageState extends State<AnyImage> {
   late Future<ResolvedSource> _resolved;
+  late ResolverPipeline _pipeline;
 
   @override
   void initState() {
     super.initState();
+
+    _pipeline = _buildPipeline();
     _resolved = _resolve();
   }
 
   @override
   void didUpdateWidget(AnyImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.source != widget.source) {
+    if (oldWidget.allowMimeSniff != widget.allowMimeSniff) {
+      _pipeline = _buildPipeline();
+    }
+    if (oldWidget.source != widget.source ||
+        oldWidget.allowMimeSniff != widget.allowMimeSniff) {
       _resolved = _resolve();
     }
   }
 
-  Future<ResolvedSource> _resolve() async {
-    var resolved = await widget.pipeline.resolve(widget.source);
+  ResolverPipeline _buildPipeline() {
+    return ResolverPipeline(
+      resolvers: const [PrefixResolver(), ExtensionResolver()],
+      asyncResolvers: widget.allowMimeSniff ? const [MimeResolver()] : const [],
+    );
+  }
 
+  Future<ResolvedSource> _resolve() async {
     if (widget.format != null) {
-      resolved = ResolvedSource(
-        raw: resolved.raw,
-        location: resolved.location,
+      final sync = _pipeline.resolveSync(widget.source);
+      return ResolvedSource(
+        raw: sync.raw,
+        location: sync.location,
         format: widget.format,
       );
     }
-
-    return resolved;
+    return _pipeline.resolve(widget.source);
   }
 
   Widget _render(ResolvedSource resolved) {

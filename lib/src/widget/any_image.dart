@@ -53,10 +53,10 @@ class AnyImage extends StatefulWidget {
   /// signals for the resolver to determine the correct type.
   final ImageFormat? format;
 
-  /// Allows developer to control network usage to render images
+  /// Allows developer to control usage of Magic Bytes to render images
   ///
-  /// Network[http] access is enabled by default
-  final bool allowNetwork;
+  /// Enabled by default. Set value to `false` to disable.
+  final bool allowMagicBytes;
 
   static const _renderers = [
     NetworkRasterRenderer(),
@@ -74,7 +74,7 @@ class AnyImage extends StatefulWidget {
     this.placeholder,
     this.errorWidget,
     this.format,
-    this.allowNetwork = true,
+    this.allowMagicBytes = true,
   });
 
   @override
@@ -98,13 +98,13 @@ class _AnyImageState extends State<AnyImage> {
   @override
   void didUpdateWidget(AnyImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.allowNetwork != widget.allowNetwork) {
+    if (oldWidget.allowMagicBytes != widget.allowMagicBytes) {
       _client.close();
       _client = http.Client();
       _pipeline = _buildPipeline();
     }
     if (oldWidget.source != widget.source ||
-        oldWidget.allowNetwork != widget.allowNetwork) {
+        oldWidget.allowMagicBytes != widget.allowMagicBytes) {
       _resolved = _resolve();
     }
   }
@@ -112,7 +112,7 @@ class _AnyImageState extends State<AnyImage> {
   ResolverPipeline _buildPipeline() {
     return ResolverPipeline(
       resolvers: const [PrefixResolver(), ExtensionResolver()],
-      asyncResolvers: widget.allowNetwork
+      asyncResolvers: widget.allowMagicBytes
           ? [MagicBytesResolver(client: _client)]
           : const [],
     );

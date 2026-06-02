@@ -59,6 +59,7 @@ class ExampleScreen extends StatelessWidget {
               height: 200,
               fit: BoxFit.cover,
               errorWidget: Center(child: Icon(Icons.broken_image)),
+              allowMagicBytes: false,
             ),
           ],
         ),

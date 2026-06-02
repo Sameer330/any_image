@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
 
 import '../model/resolved_source.dart';
 import '../model/source_type.dart';
@@ -8,6 +9,7 @@ import '../renderer/image_renderer.dart';
 import '../renderer/network_raster_renderer.dart';
 import '../renderer/network_svg_renderer.dart';
 import '../resolver/extension_resolver.dart';
+import '../resolver/magic_bytes_resolver.dart';
 import '../resolver/prefix_resolver.dart';
 import '../resolver/resolver_pipeline.dart';
 
@@ -19,11 +21,14 @@ import '../resolver/resolver_pipeline.dart';
 /// Supports network URLs, asset paths, and SVG images without
 /// requiring the caller to know the image type in advance
 ///
+/// Magic bytes resolution is used for extension-less URLs and can be
+/// disabled via [allowNetwork].
+///
 /// ```dart
 /// AnyImage(source: 'https://example.com/image.png')
 /// AnyImage(source: 'assets/icons/logo.svg')
 /// ```
-class AnyImage extends StatelessWidget {
+class AnyImage extends StatefulWidget {
   /// The image source — a URL, asset path, or file path.
   final String source;
 
@@ -48,9 +53,10 @@ class AnyImage extends StatelessWidget {
   /// signals for the resolver to determine the correct type.
   final ImageFormat? format;
 
-  static const _pipeline = ResolverPipeline(
-    resolvers: [PrefixResolver(), ExtensionResolver()],
-  );
+  /// Allows developer to control network usage to render images
+  ///
+  /// Network[http] access is enabled by default
+  final bool allowNetwork;
 
   static const _renderers = [
     NetworkRasterRenderer(),
@@ -68,36 +74,104 @@ class AnyImage extends StatelessWidget {
     this.placeholder,
     this.errorWidget,
     this.format,
+    this.allowNetwork = true,
   });
 
   @override
-  Widget build(BuildContext context) {
-    var resolved = _pipeline.resolve(source);
+  State<AnyImage> createState() => _AnyImageState();
+}
 
-    if (format != null) {
-      resolved = ResolvedSource(
+class _AnyImageState extends State<AnyImage> {
+  late Future<ResolvedSource> _resolved;
+  late ResolverPipeline _pipeline;
+  late http.Client _client;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _client = http.Client();
+    _pipeline = _buildPipeline();
+    _resolved = _resolve();
+  }
+
+  @override
+  void didUpdateWidget(AnyImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.allowNetwork != widget.allowNetwork) {
+      _client.close();
+      _client = http.Client();
+      _pipeline = _buildPipeline();
+    }
+    if (oldWidget.source != widget.source ||
+        oldWidget.allowNetwork != widget.allowNetwork) {
+      _resolved = _resolve();
+    }
+  }
+
+  ResolverPipeline _buildPipeline() {
+    return ResolverPipeline(
+      resolvers: const [PrefixResolver(), ExtensionResolver()],
+      asyncResolvers: widget.allowNetwork
+          ? [MagicBytesResolver(client: _client)]
+          : const [],
+    );
+  }
+
+  Future<ResolvedSource> _resolve() async {
+    if (widget.format != null) {
+      // sync resolve is sufficient — format is known
+      final resolved = _pipeline.resolve(widget.source);
+      return ResolvedSource(
         raw: resolved.raw,
         location: resolved.location,
-        format: format,
+        format: widget.format,
       );
     }
+    return await _pipeline.resolveAsync(widget.source);
+  }
 
-    final renderer = _renderers.cast<ImageRenderer?>().firstWhere(
+  Widget _render(ResolvedSource resolved) {
+    final renderer = AnyImage._renderers.cast<ImageRenderer?>().firstWhere(
           (r) => r!.canRender(resolved),
           orElse: () => null,
         );
 
     if (renderer == null) {
-      return errorWidget ?? const SizedBox.shrink();
+      return widget.errorWidget ?? const SizedBox.shrink();
     }
 
     return renderer.render(
       resolved,
-      width: width,
-      height: height,
-      fit: fit,
-      placeholder: placeholder,
-      errorWidget: errorWidget,
+      width: widget.width,
+      height: widget.height,
+      fit: widget.fit,
+      placeholder: widget.placeholder,
+      errorWidget: widget.errorWidget,
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<ResolvedSource>(
+      future: _resolved,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return widget.errorWidget ?? const SizedBox.shrink();
+        }
+
+        if (!snapshot.hasData) {
+          return widget.placeholder ?? const SizedBox.shrink();
+        }
+
+        return _render(snapshot.data!);
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _client.close();
+    super.dispose();
   }
 }

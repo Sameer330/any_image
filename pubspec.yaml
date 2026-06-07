@@ -1,6 +1,6 @@
 name: any_image
 description: "A universal Flutter image widget that renders any source"
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/Sameer330/any_image
 
 environment:

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.0.2] - 2026-06-07
+
+### Added
+
+- `AsyncSourceResolver` — interface for resolvers requiring async operations
+- `MagicBytesResolver` — detects image format from binary magic bytes via HTTP range request (`bytes=0-63`); supports PNG, JPEG, WebP, GIF, SVG
+- `allowMagicBytes` param on `AnyImage` — opt out of async format detection
+- `DESIGN.md` — architectural overview for contributors
+
+### Changed
+
+- `ResolverPipeline` — extended with async resolver support; async pass only runs when format is unresolved after sync pass
+- `AnyImage` widget — manages `http.Client` lifecycle for async resolution
+
 ## [0.0.1] - 2026-04-22
 
 ### Added

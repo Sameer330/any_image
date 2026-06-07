@@ -52,7 +52,15 @@ class ExampleScreen extends StatelessWidget {
               fit: BoxFit.cover,
               errorWidget: Center(child: Icon(Icons.broken_image)),
             ),
-            _SectionLabel('Unknown image type'),
+            _SectionLabel('Unknown image type - Magic Bytes Enabled(default)'),
+            AnyImage(
+              source: 'https://cdn.simpleicons.org/flutter',
+              width: double.infinity,
+              height: 200,
+              fit: BoxFit.cover,
+              errorWidget: Center(child: Icon(Icons.broken_image)),
+            ),
+            _SectionLabel('Unknown image type - Magic Bytes Disabled'),
             AnyImage(
               source: 'https://cdn.simpleicons.org/flutter',
               width: double.infinity,

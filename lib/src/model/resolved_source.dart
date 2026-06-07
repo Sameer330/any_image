@@ -2,7 +2,7 @@ import 'source_type.dart';
 
 /// Represents an image source after it has been resolved
 /// to a specific type.
-/// 
+///
 /// This is the handoff object between the resolver layer
 /// and the renderer layer
 class ResolvedSource {

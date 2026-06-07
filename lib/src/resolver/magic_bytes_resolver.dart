@@ -13,8 +13,9 @@ import 'async_source_resolver.dart';
 /// Used as an async fallback when [PrefixResolver] and [ExtensionResolver]
 /// cannot determine format — typically for extension-less network URLs
 ///
-/// Sends a range request (`bytes=0-11`) to avoid downloading the full image.
-/// Falls back to a full request if the server does not support range requests.
+/// Sends a range request (`bytes=0-63`) to avoid downloading the full image.
+/// Streams the response and reads at most 64 bytes, even if the server ignores
+/// the Range header and returns the full file.
 ///
 /// Only determines [ImageFormat]. Location must already be established
 /// by a sync resolver before this runs.
@@ -25,8 +26,6 @@ class MagicBytesResolver implements AsyncSourceResolver {
 
   MagicBytesResolver({required http.Client client}) : _client = client;
 
-  static const _rangeHeader = {'Range': 'bytes=0-63'};
-
   @override
   Future<ResolvedSource?> resolve(String source) async {
     if (!source.startsWith('http://') && !source.startsWith('https://')) {
@@ -34,16 +33,23 @@ class MagicBytesResolver implements AsyncSourceResolver {
     }
 
     try {
-      final response = await _client.get(
-        Uri.parse(source),
-        headers: _rangeHeader,
-      );
+      final request = http.Request('GET', Uri.parse(source))
+        ..headers['Range'] = 'bytes=0-63';
 
-      if (response.statusCode != 200 && response.statusCode != 206) {
+      final streamed = await _client.send(request);
+
+      if (streamed.statusCode != 200 && streamed.statusCode != 206) {
+        streamed.stream.drain();
         return null;
       }
 
-      final format = _detectFormat(response.bodyBytes);
+      final bytes = <int>[];
+      await for (final chunk in streamed.stream) {
+        bytes.addAll(chunk);
+        if (bytes.length >= 64) break;
+      }
+
+      final format = _detectFormat(Uint8List.fromList(bytes));
       if (format == null) return null;
 
       return ResolvedSource(raw: source, format: format);

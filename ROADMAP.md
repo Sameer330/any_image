@@ -10,6 +10,12 @@ It exists to help contributors understand what is being worked on, what is plann
 
 ## Current Release
 
+### v0.0.2 — Magic Bytes Detection ✅
+- `MagicBytesResolver` — detects PNG/JPEG/WebP/GIF/SVG via magic bytes using HTTP range requests
+- `AsyncSourceResolver` interface
+- `allowMagicBytes` param on `AnyImage`
+- `ResolverPipeline` updated with async fallback pass
+
 ### v0.0.1 — Foundation ✅
 
 The core problem: accept any image source string and render the correct widget automatically.
@@ -84,12 +90,10 @@ Allow a secondary source to be rendered if the primary source fails.
 
 These are not planned yet but may be explored based on community feedback:
 
-- **MIME sniffing** — detect image type from HTTP `Content-Type` header for extension-less URLs
 - **Base64 data URI support** — render `data:image/png;base64,...` sources
 - **Lottie support** — via a separate companion package `any_image_lottie`
 - **Cached asset support** — pre-warm asset images into Flutter's `ImageCache`
 - **Debug overlay** — show resolved type and renderer in debug mode for easier diagnosis
-- **Headers param** — forwards custom HTTP headers to `cached_network_image` for authenticated endpoints (Bearer tokens, CDN auth, etc.)
 
 ---
 
